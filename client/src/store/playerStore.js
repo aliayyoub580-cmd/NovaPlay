@@ -69,10 +69,10 @@ export const usePlayerStore = create((set, get) => ({
   // ── Load a new queue and start playing ────────────────────────────────
   loadQueue: async (files, startIndex = 0, options = {}) => {
     if (!files || files.length === 0) return;
-    const items = files.map(fp => ({
-      file_path: fp,
-      file_name: getFileName(fp),
-      media_type: getMediaType(fp),
+    const items = files.map(file => typeof file === 'object' ? file : ({
+      file_path: file,
+      file_name: getFileName(file),
+      media_type: getMediaType(file),
     }));
     set({ queue: items, queueIndex: -1, playing: false, currentTime: 0 });
     await get()._loadIndex(startIndex, true, options.skipResume === true);

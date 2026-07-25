@@ -305,7 +305,6 @@ export default function PlayerView() {
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={handleEnded}
           onError={handleError}
-          crossOrigin="anonymous"
           playsInline
         >
           {subtitleFile && (
@@ -322,7 +321,6 @@ export default function PlayerView() {
             onLoadedMetadata={handleLoadedMetadata}
             onEnded={handleEnded}
             onError={handleError}
-            crossOrigin="anonymous"
           />
           <div className="audio-artwork" aria-hidden="true">
             <svg width="88" height="88" viewBox="0 0 24 24" fill="none">

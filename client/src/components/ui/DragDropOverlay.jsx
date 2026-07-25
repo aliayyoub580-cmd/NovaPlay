@@ -29,9 +29,16 @@ export default function DragDropOverlay() {
       counter = 0;
       setDragging(false);
       const files = Array.from(e.dataTransfer.files)
-        .map(f => f.path)
-        .filter(Boolean)
-        .filter(isSupported);
+        .filter(file => isSupported(file.name))
+        .map(file => {
+          if (window.novaplay && file.path) return file.path;
+          return {
+            file_path: URL.createObjectURL(file),
+            file_name: file.name,
+            media_type: file.type.startsWith('video/') ? 'video' : 'audio',
+            browser_file: true,
+          };
+        });
       if (files.length === 0) {
         toast.error('No supported media files dropped');
         return;
