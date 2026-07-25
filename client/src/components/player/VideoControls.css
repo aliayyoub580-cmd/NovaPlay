@@ -1,0 +1,36 @@
+.video-controls-overlay {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 30;
+  animation: vc-fade-in 0.2s ease;
+}
+
+@keyframes vc-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.vc-group {
+  display: flex;
+  gap: 4px;
+  background: rgba(0,0,0,0.55);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  backdrop-filter: blur(6px);
+}
+
+.vc-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: rgba(255,255,255,0.75);
+  transition: all var(--transition);
+}
+.vc-btn:hover {
+  background: rgba(248,124,46,0.3);
+  color: var(--accent);
+}

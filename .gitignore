@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+client/node_modules/
+
+# Generated frontend and desktop builds
+client/dist/
+dist-app/
+dist/
+.build-cache/
+
+# Local runtime data and logs
+*.log
+*.db
+*.db-shm
+*.db-wal
+
+# Local environment and deployment state
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+

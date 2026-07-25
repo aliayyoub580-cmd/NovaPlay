@@ -1,0 +1,107 @@
+{
+  "name": "novaplay",
+  "version": "1.0.5",
+  "description": "NovaPlay – Advanced Desktop Music & Video Player",
+  "main": "electron/main.js",
+  "author": "NovaPlay",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently -k -n VITE,ELECTRON -c cyan,orange \"npm run dev:client\" \"npm run dev:electron\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:electron": "wait-on http://localhost:5173 && electron .",
+    "build:client": "cd client && npm run build",
+    "test:media": "npm run build:client && set ELECTRON_RUN_AS_NODE=&& electron scripts/media-smoke.js \"client/public/DAKU.mp3\" \"client/public/41 Kaka___Teeji_Seat__Official_Video__Aakansha___New_Punjabi_Songs_2021-Latest_Punjabi_Songs_2020_2021(720p).mp4\"",
+    "build": "npm run build:client",
+    "build:installer": "npm run build:client && electron-builder --win nsis",
+    "build:portable": "npm run build:client && electron-builder --win portable",
+    "dist": "npm run build:client && electron-builder --win nsis portable"
+  },
+  "build": {
+    "appId": "com.novaplay.desktop",
+    "productName": "NovaPlay",
+    "copyright": "Copyright © 2026 NovaPlay",
+    "executableName": "NovaPlay",
+    "directories": {
+      "output": "dist-app"
+    },
+    "files": [
+      "electron/**/*",
+      "server/**/*",
+      "shared/**/*",
+      "client/dist/**/*",
+      "assets/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules/sql.js/dist/sql-wasm.wasm",
+        "to": "node_modules/sql.js/dist/sql-wasm.wasm"
+      }
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "assets/icon.ico",
+      "signAndEditExecutable": true,
+      "publisherName": "NovaPlay"
+    },
+    "fileAssociations": [
+      {
+        "ext": ["mp3","wav","aac","flac","ogg","m4a","wma","opus","aiff"],
+        "name": "NovaPlay Audio",
+        "description": "NovaPlay Audio File",
+        "role": "Viewer",
+        "icon": "assets/icon.ico"
+      },
+      {
+        "ext": ["mp4","mkv","avi","webm","mov","wmv","flv","mpeg","mpg","m4v","3gp"],
+        "name": "NovaPlay Video",
+        "description": "NovaPlay Video File",
+        "role": "Viewer",
+        "icon": "assets/icon.ico"
+      }
+    ],
+    "nsis": {
+      "artifactName": "NovaPlay-Setup-${version}.${ext}",
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "runAfterFinish": true,
+      "include": "build/installer.nsh",
+      "license": "LICENSE.txt",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NovaPlay",
+      "menuCategory": "NovaPlay",
+      "uninstallDisplayName": "NovaPlay ${version}",
+      "deleteAppDataOnUninstall": false,
+      "differentialPackage": false
+    },
+    "portable": {
+      "artifactName": "NovaPlay-Portable-${version}.${ext}"
+    },
+    "protocols": [
+      { "name": "novaplay", "schemes": ["novaplay"] }
+    ]
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "electron-store": "^10.0.0",
+    "express": "^4.19.2",
+    "express-validator": "^7.1.0",
+    "helmet": "^7.1.0",
+    "sql.js": "^1.12.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "wait-on": "^7.2.0"
+  }
+}

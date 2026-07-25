@@ -1,0 +1,58 @@
+.resume-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.resume-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 32px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  min-width: 260px;
+}
+
+.resume-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.resume-pos {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.resume-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-resume {
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 13px;
+  transition: background var(--transition);
+}
+.btn-resume:hover { background: var(--accent-hover); }
+
+.btn-restart {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  padding: 8px 20px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  transition: background var(--transition);
+}
+.btn-restart:hover { background: var(--bg-active); color: var(--text-primary); }

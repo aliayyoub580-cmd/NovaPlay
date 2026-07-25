@@ -1,0 +1,16 @@
+node_modules
+client/node_modules
+client/dist
+dist-app
+.build-cache
+electron
+server
+shared
+scripts
+assets
+build
+client/public/*.mp3
+client/public/*.mp4
+*.log
+*.db
+

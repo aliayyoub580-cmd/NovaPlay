@@ -1,0 +1,51 @@
+NOVAPLAY END USER LICENSE AGREEMENT
+
+Version 1.0.5
+
+Please read this agreement carefully before installing or using NovaPlay.
+
+1. LICENSE GRANT
+
+NovaPlay grants you a non-exclusive, non-transferable license to install and
+use this software on computers that you own or control.
+
+2. MEDIA AND USER CONTENT
+
+NovaPlay does not claim ownership of media, playlists, settings, or other
+content opened or created by you. You are responsible for ensuring that your
+use of media complies with applicable law and third-party rights.
+
+3. RESTRICTIONS
+
+You may not sell, sublicense, or distribute modified copies of NovaPlay under
+the NovaPlay name without written permission. You may not use the software for
+an unlawful purpose.
+
+4. PRIVACY AND LOCAL DATA
+
+NovaPlay stores application settings, playlists, favourites, playback history,
+and related data in your Windows user profile. An upgrade does not remove this
+data. A normal uninstall also preserves it.
+
+5. DISCLAIMER
+
+The software is provided "as is", without warranties of any kind, to the
+maximum extent permitted by applicable law.
+
+6. LIMITATION OF LIABILITY
+
+To the maximum extent permitted by applicable law, NovaPlay and its publisher
+will not be liable for indirect, incidental, special, or consequential damages
+arising from use of the software.
+
+7. TERMINATION
+
+This license ends automatically if you materially breach its terms. On
+termination, you must stop using and remove the software.
+
+8. ACCEPTANCE
+
+By selecting "I accept the terms in the License Agreement" and continuing the
+installation, you confirm that you have read and accepted this agreement.
+
+Copyright (c) 2026 NovaPlay. All rights reserved.

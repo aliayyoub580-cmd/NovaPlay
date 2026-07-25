@@ -1,0 +1,12 @@
+.homepage-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.homepage-player {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}

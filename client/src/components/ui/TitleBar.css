@@ -1,0 +1,113 @@
+.titlebar {
+  height: var(--titlebar-h);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  -webkit-app-region: drag;
+  flex-shrink: 0;
+  z-index: 100;
+  position: relative;
+}
+
+.header-menu {
+  position: absolute;
+  top: calc(100% + 1px);
+  left: 150px;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  border: 1px solid var(--border-light);
+  border-radius: 0 0 7px 7px;
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow);
+  -webkit-app-region: no-drag;
+}
+
+.header-menu button {
+  padding: 7px 10px;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.header-menu button:hover,
+.header-menu button.active {
+  color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.titlebar-drag {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.titlebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.titlebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 14px;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar-action {
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.titlebar-action:hover,
+.titlebar-action.active {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+
+.titlebar-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.3px;
+}
+
+.titlebar-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+  height: 100%;
+}
+
+.tb-btn {
+  width: 46px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: background var(--transition), color var(--transition);
+}
+
+.tb-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.tb-btn.close:hover {
+  background: #c0392b;
+  color: #fff;
+}

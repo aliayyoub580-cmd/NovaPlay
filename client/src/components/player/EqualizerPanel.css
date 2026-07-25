@@ -1,0 +1,121 @@
+.eq-panel {
+  position: absolute;
+  bottom: calc(var(--controlbar-h) + 4px);
+  right: 90px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  width: 440px;
+  box-shadow: var(--shadow);
+  z-index: 200;
+}
+
+.eq-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.eq-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eq-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.eq-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.eq-preset-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+.eq-preset-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+.eq-preset-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.eq-preamp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.eq-preamp input { flex: 1; }
+.eq-preamp span { min-width: 56px; font-variant-numeric: tabular-nums; }
+
+.eq-bands {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.eq-band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.eq-val {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-height: 14px;
+}
+
+.eq-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  appearance: slider-vertical;
+  width: 20px;
+  height: 80px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.eq-freq {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.eq-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.eq-btn {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  transition: background var(--transition);
+}
+.eq-btn:hover { background: var(--bg-active); color: var(--text-primary); }
+.eq-btn.accent { background: var(--accent); color: #fff; }
+.eq-btn.accent:hover { background: var(--accent-hover); }
