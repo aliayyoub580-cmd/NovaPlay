@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=300, initial-scale=1">
+    <style>
+      html, body { width: 300px; height: 250px; margin: 0; overflow: hidden; background: transparent; }
+    </style>
+  </head>
+  <body>
+    <script>
+      window.__novaplayAdFailed = false;
+      window.__novaplayReportCreative = () => {
+        const creative = document.querySelector('iframe, object, embed');
+        if (!creative || window.__novaplayCreativeReported) return;
+        window.__novaplayCreativeReported = true;
+        parent.postMessage({
+          source: 'novaplay-adsterra-pause-banner',
+          status: 'rendered'
+        }, '*');
+      };
+      const creativeObserver = new MutationObserver(window.__novaplayReportCreative);
+      creativeObserver.observe(document.documentElement, { childList: true, subtree: true });
+
+      atOptions = {
+        'key' : 'ae37bf79b18906b85bf4cd794d6ff7a8',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    </script>
+    <script
+      src="https://www.highperformanceformat.com/ae37bf79b18906b85bf4cd794d6ff7a8/invoke.js"
+      onerror="window.__novaplayAdFailed = true"
+    ></script>
+    <script>
+      if (window.__novaplayAdFailed) {
+        parent.postMessage({
+          source: 'novaplay-adsterra-pause-banner',
+          status: 'failed'
+        }, '*');
+      } else {
+        window.__novaplayReportCreative();
+      }
+    </script>
+  </body>
+</html>

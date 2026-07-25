@@ -2,7 +2,7 @@
 
 const {
   app, BrowserWindow, Tray, Menu, shell, dialog,
-  nativeImage, protocol, globalShortcut,
+  nativeImage, protocol, globalShortcut, session,
 } = require('electron');
 const path   = require('path');
 const fs     = require('fs');
@@ -213,6 +213,20 @@ function createTray() {
 // ── App ready ─────────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
   logStartup('app ready');
+  // Warm the two HTTPS connections used by the already-mounted pause banner
+  // while the local database and API initialize. This removes DNS/TLS work
+  // from the first ad-frame load without making an impression or loading a
+  // second copy of the advertisement.
+  try {
+    session.defaultSession.preconnect({
+      url: 'https://novaplay-app.vercel.app',
+      numSockets: 1,
+    });
+    session.defaultSession.preconnect({
+      url: 'https://www.highperformanceformat.com',
+      numSockets: 1,
+    });
+  } catch {}
   // Register media:// protocol for local file access
   protocol.registerFileProtocol('media', (request, callback) => {
     try {

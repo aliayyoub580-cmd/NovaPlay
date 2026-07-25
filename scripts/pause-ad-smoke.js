@@ -33,6 +33,7 @@ app.whenReady().then(async () => {
     },
   });
 
+  const startupBeganAt = Date.now();
   await window.loadFile(path.join(__dirname, '../client/dist/index.html'));
   for (let attempt = 0; attempt < 120; attempt += 1) {
     const state = await window.webContents.executeJavaScript(
@@ -41,6 +42,7 @@ app.whenReady().then(async () => {
     if (state === 'loaded' || state === 'failed') break;
     await wait(250);
   }
+  const adReadyMs = Date.now() - startupBeganAt;
   await window.webContents.executeJavaScript(`
     (async () => {
       const response = await fetch('./DAKU.mp3');
@@ -88,9 +90,7 @@ app.whenReady().then(async () => {
         loadState: overlay?.dataset.loadState || null,
         iframeCount: document.querySelectorAll('.pause-ad-frame').length,
         playing: document.querySelector('.play-btn')?.getAttribute('aria-label') === 'Pause',
-        srcDocLength: document.querySelector('.pause-ad-frame')?.srcdoc?.length || 0,
-        creativeCount: document.querySelector('.pause-ad-frame')?.contentDocument
-          ?.querySelectorAll('iframe, object, embed').length || 0
+        creativeRendered: overlay?.dataset.creativeRendered === 'true'
       };
     })()
   `);
@@ -126,6 +126,7 @@ app.whenReady().then(async () => {
 
   const result = {
     pausedState,
+    adReadyMs,
     firstPauseLatencyMs,
     hiddenAfterResume,
     secondPause,
@@ -133,7 +134,7 @@ app.whenReady().then(async () => {
     adErrors,
   };
   result.ok = pausedState.exists && pausedState.visible && pausedState.loadState === 'loaded' &&
-    pausedState.iframeCount === 1 && pausedState.creativeCount > 0 && pausedState.playing === false &&
+    pausedState.iframeCount === 1 && pausedState.creativeRendered && pausedState.playing === false &&
     firstPauseLatencyMs < 500 && hiddenAfterResume && secondPause.visible &&
     secondPause.latencyMs < 500 && secondPause.iframeCount === 1 && secondPause.sameIframe &&
     adRequests.some(request => request.phase === 'completed' && request.statusCode < 400);

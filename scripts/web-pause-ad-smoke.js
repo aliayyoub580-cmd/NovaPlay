@@ -75,8 +75,7 @@ app.whenReady().then(async () => {
         visible: overlay?.classList.contains('visible') || false,
         loadState: overlay?.dataset.loadState || null,
         iframeCount: document.querySelectorAll('.pause-ad-frame').length,
-        creativeCount: document.querySelector('.pause-ad-frame')?.contentDocument
-          ?.querySelectorAll('iframe, object, embed').length || 0
+        creativeRendered: overlay?.dataset.creativeRendered === 'true'
       };
     })()
   `);
@@ -120,7 +119,7 @@ app.whenReady().then(async () => {
     })
   `);
   result.ok = shown.visible && shown.loadState === 'loaded' && shown.iframeCount === 1 &&
-    shown.creativeCount > 0 && firstPauseLatencyMs < 500 && hidden &&
+    shown.creativeRendered && firstPauseLatencyMs < 500 && hidden &&
     secondPause.latencyMs < 500 && secondPause.sameIframe && secondPause.iframeCount === 1 &&
     adRequests.some(request => request.phase === 'completed' && request.statusCode < 400);
   console.log(JSON.stringify(result, null, 2));
