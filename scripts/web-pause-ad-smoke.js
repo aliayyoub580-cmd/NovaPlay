@@ -24,8 +24,14 @@ app.whenReady().then(async () => {
     webPreferences: { contextIsolation: true, nodeIntegration: false, webSecurity: true },
   });
   await window.loadURL(SITE_URL);
+  for (let attempt = 0; attempt < 120; attempt += 1) {
+    const state = await window.webContents.executeJavaScript(
+      `document.querySelector('.pause-ad-overlay')?.dataset.loadState || 'idle'`,
+    );
+    if (state === 'loaded' || state === 'failed') break;
+    await wait(250);
+  }
   await window.webContents.executeJavaScript(`
-    localStorage.removeItem('novaplay.pauseAd.lastShownAt');
     const file = new File([new Uint8Array([73, 68, 51, 4, 0, 0, 0, 0, 0, 0])], 'ad-test.mp3', {
       type: 'audio/mpeg'
     });
@@ -38,8 +44,20 @@ app.whenReady().then(async () => {
     }));
   `);
   await wait(500);
-  await window.webContents.executeJavaScript(`
-    window.dispatchEvent(new CustomEvent('novaplay-user-playback', { detail: { paused: true } }));
+  const firstPauseLatencyMs = await window.webContents.executeJavaScript(`
+    new Promise((resolve) => {
+      const overlay = document.querySelector('.pause-ad-overlay');
+      const start = performance.now();
+      window.dispatchEvent(new CustomEvent('novaplay-user-playback', { detail: { paused: true } }));
+      const measure = () => {
+        if (overlay.classList.contains('visible')) {
+          resolve(performance.now() - start);
+          return;
+        }
+        requestAnimationFrame(measure);
+      };
+      measure();
+    })
   `);
 
   for (let attempt = 0; attempt < 120; attempt += 1) {
@@ -69,8 +87,30 @@ app.whenReady().then(async () => {
   const hidden = await window.webContents.executeJavaScript(
     `!document.querySelector('.pause-ad-overlay')?.classList.contains('visible')`,
   );
+  await wait(1200);
+  const secondPause = await window.webContents.executeJavaScript(`
+    new Promise((resolve) => {
+      const iframe = document.querySelector('.pause-ad-frame');
+      iframe.dataset.smokeIdentity = 'original-banner';
+      const overlay = document.querySelector('.pause-ad-overlay');
+      const start = performance.now();
+      window.dispatchEvent(new CustomEvent('novaplay-user-playback', { detail: { paused: true } }));
+      const measure = () => {
+        if (overlay.classList.contains('visible')) {
+          resolve({
+            latencyMs: performance.now() - start,
+            sameIframe: document.querySelector('.pause-ad-frame')?.dataset.smokeIdentity === 'original-banner',
+            iframeCount: document.querySelectorAll('.pause-ad-frame').length
+          });
+          return;
+        }
+        requestAnimationFrame(measure);
+      };
+      measure();
+    })
+  `);
 
-  const result = { site: SITE_URL, shown, hidden, adRequests };
+  const result = { site: SITE_URL, shown, firstPauseLatencyMs, hidden, secondPause, adRequests };
   result.page = await window.webContents.executeJavaScript(`
     ({
       url: location.href,
@@ -80,8 +120,9 @@ app.whenReady().then(async () => {
     })
   `);
   result.ok = shown.visible && shown.loadState === 'loaded' && shown.iframeCount === 1 &&
-    shown.creativeCount > 0 &&
-    hidden && adRequests.some(request => request.phase === 'completed' && request.statusCode < 400);
+    shown.creativeCount > 0 && firstPauseLatencyMs < 500 && hidden &&
+    secondPause.latencyMs < 500 && secondPause.sameIframe && secondPause.iframeCount === 1 &&
+    adRequests.some(request => request.phase === 'completed' && request.statusCode < 400);
   console.log(JSON.stringify(result, null, 2));
   window.destroy();
   app.exit(result.ok ? 0 : 1);

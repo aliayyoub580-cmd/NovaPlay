@@ -34,8 +34,14 @@ app.whenReady().then(async () => {
   });
 
   await window.loadFile(path.join(__dirname, '../client/dist/index.html'));
+  for (let attempt = 0; attempt < 120; attempt += 1) {
+    const state = await window.webContents.executeJavaScript(
+      `document.querySelector('.pause-ad-overlay')?.dataset.loadState || 'idle'`,
+    );
+    if (state === 'loaded' || state === 'failed') break;
+    await wait(250);
+  }
   await window.webContents.executeJavaScript(`
-    localStorage.removeItem('novaplay.pauseAd.lastShownAt');
     (async () => {
       const response = await fetch('./DAKU.mp3');
       const blob = await response.blob();
@@ -47,25 +53,32 @@ app.whenReady().then(async () => {
   `);
 
   await wait(800);
-  await window.webContents.executeJavaScript(`
-    (() => {
+  const firstPauseLatencyMs = await window.webContents.executeJavaScript(`
+    new Promise((resolve) => {
       const button = document.querySelector('.play-btn');
       if (!button) throw new Error('Playback button not found');
       if (button.getAttribute('aria-label') !== 'Pause') button.click();
-      setTimeout(() => {
+      const pauseWhenPlaying = () => {
         const pauseButton = document.querySelector('.play-btn');
-        if (pauseButton?.getAttribute('aria-label') === 'Pause') pauseButton.click();
-      }, 150);
-    })();
+        if (pauseButton?.getAttribute('aria-label') !== 'Pause') {
+          requestAnimationFrame(pauseWhenPlaying);
+          return;
+        }
+        const overlay = document.querySelector('.pause-ad-overlay');
+        const start = performance.now();
+        pauseButton.click();
+        const measure = () => {
+          if (overlay.classList.contains('visible')) {
+            resolve(performance.now() - start);
+            return;
+          }
+          requestAnimationFrame(measure);
+        };
+        measure();
+      };
+      pauseWhenPlaying();
+    })
   `);
-
-  for (let attempt = 0; attempt < 120; attempt += 1) {
-    const state = await window.webContents.executeJavaScript(
-      `document.querySelector('.pause-ad-overlay')?.dataset.loadState || 'idle'`,
-    );
-    if (state === 'loaded' || state === 'failed') break;
-    await wait(250);
-  }
   const pausedState = await window.webContents.executeJavaScript(`
     (() => {
       const overlay = document.querySelector('.pause-ad-overlay');
@@ -83,29 +96,46 @@ app.whenReady().then(async () => {
   `);
 
   await window.webContents.executeJavaScript(`document.querySelector('.play-btn')?.click()`);
-  await wait(350);
+  await wait(100);
   const hiddenAfterResume = await window.webContents.executeJavaScript(
     `!document.querySelector('.pause-ad-overlay')?.classList.contains('visible')`,
   );
-  await window.webContents.executeJavaScript(`document.querySelector('.play-btn')?.click()`);
-  await wait(350);
-  const cooldownState = await window.webContents.executeJavaScript(`
-    (() => ({
-      visible: document.querySelector('.pause-ad-overlay')?.classList.contains('visible') || false,
-      iframeCount: document.querySelectorAll('.pause-ad-frame').length
-    }))()
+  await wait(1200);
+  const secondPause = await window.webContents.executeJavaScript(`
+    new Promise((resolve) => {
+      const iframe = document.querySelector('.pause-ad-frame');
+      iframe.dataset.smokeIdentity = 'original-banner';
+      const overlay = document.querySelector('.pause-ad-overlay');
+      const start = performance.now();
+      document.querySelector('.play-btn')?.click();
+      const measure = () => {
+        if (overlay.classList.contains('visible')) {
+          resolve({
+            latencyMs: performance.now() - start,
+            visible: true,
+            iframeCount: document.querySelectorAll('.pause-ad-frame').length,
+            sameIframe: document.querySelector('.pause-ad-frame')?.dataset.smokeIdentity === 'original-banner'
+          });
+          return;
+        }
+        requestAnimationFrame(measure);
+      };
+      measure();
+    })
   `);
 
   const result = {
     pausedState,
+    firstPauseLatencyMs,
     hiddenAfterResume,
-    cooldownState,
+    secondPause,
     adRequests,
     adErrors,
   };
   result.ok = pausedState.exists && pausedState.visible && pausedState.loadState === 'loaded' &&
     pausedState.iframeCount === 1 && pausedState.creativeCount > 0 && pausedState.playing === false &&
-    hiddenAfterResume && cooldownState.visible === false && cooldownState.iframeCount === 1 &&
+    firstPauseLatencyMs < 500 && hiddenAfterResume && secondPause.visible &&
+    secondPause.latencyMs < 500 && secondPause.iframeCount === 1 && secondPause.sameIframe &&
     adRequests.some(request => request.phase === 'completed' && request.statusCode < 400);
   console.log(JSON.stringify(result, null, 2));
   window.destroy();

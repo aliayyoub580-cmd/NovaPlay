@@ -11,13 +11,14 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 220ms ease, background-color 220ms ease, visibility 0s linear 220ms;
+  transition: opacity 150ms ease, background-color 150ms ease, visibility 0s linear 150ms;
 }
 
 .pause-ad-overlay.visible {
   background: rgba(0, 0, 0, 0.48);
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
   transition-delay: 0s;
 }
 

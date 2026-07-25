@@ -272,6 +272,14 @@ export default function PlayerView() {
     store.setPlayingByUser(!store.playing);
   }, []);
 
+  const handlePlayerClick = useCallback((event) => {
+    if (event.button !== 0) return;
+    if (event.target.closest('.video-controls, .player-context-menu, .pause-ad-overlay')) return;
+    if (event.target.tagName !== 'VIDEO' && !event.target.closest('.audio-player-view')) return;
+    const store = usePlayerStore.getState();
+    store.setPlayingByUser(!store.playing);
+  }, []);
+
   const handleContextMenu = useCallback((event) => {
     event.preventDefault();
     setContextMenu({ x: event.clientX, y: event.clientY });
@@ -291,13 +299,16 @@ export default function PlayerView() {
   // ── Empty state ────────────────────────────────────────────────────────
   if (!currentMedia) {
     return (
-      <div className="player-empty">
+      <div className="player-view" ref={containerRef}>
+        <AdsterraPauseBanner ref={pauseAdRef} />
+        <div className="player-empty">
         <svg width="72" height="72" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <circle cx="12" cy="12" r="10" stroke="var(--accent)" strokeWidth="1.5" opacity="0.35"/>
           <polygon points="9,7 9,17 18,12" fill="var(--accent)" opacity="0.5"/>
         </svg>
         <p className="player-empty-title">NovaPlay</p>
         <p className="player-empty-hint">Open a file · Drag &amp; drop · Right-click "Open With"</p>
+        </div>
       </div>
     );
   }
@@ -310,8 +321,10 @@ export default function PlayerView() {
       onMouseMove={handleMouseMove}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
+      onClick={handlePlayerClick}
       onContextMenu={handleContextMenu}
     >
+      <AdsterraPauseBanner ref={pauseAdRef} />
       {/* ── Video player ── */}
       {isVideo ? (
         <video
@@ -367,8 +380,6 @@ export default function PlayerView() {
           Volume {volumeOverlay}%
         </div>
       )}
-
-      <AdsterraPauseBanner ref={pauseAdRef} />
 
       {/* ── Resume prompt ── */}
       {resumePrompt && (

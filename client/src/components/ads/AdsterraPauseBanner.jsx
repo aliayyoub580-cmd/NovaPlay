@@ -5,10 +5,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { flushSync } from 'react-dom';
 import './AdsterraPauseBanner.css';
 
-const COOLDOWN_MS = 15 * 60 * 1000;
-const LAST_SHOWN_KEY = 'novaplay.pauseAd.lastShownAt';
 const AD_MESSAGE_SOURCE = 'novaplay-adsterra-pause-banner';
 
 /*
@@ -51,69 +50,55 @@ function createAdDocument() {
     <script>
       window.atOptions = ${options};
       window.__novaplayAdFailed = false;
+      window.__novaplayReportCreative = () => {
+        const creative = document.querySelector('iframe, object, embed');
+        if (!creative || window.__novaplayCreativeReported) return;
+        window.__novaplayCreativeReported = true;
+        parent.postMessage({ source: ${source}, status: 'rendered' }, '*');
+      };
+      const creativeObserver = new MutationObserver(window.__novaplayReportCreative);
+      creativeObserver.observe(document.documentElement, { childList: true, subtree: true });
     </script>
     <script
       src=${scriptUrl}
       onerror="window.__novaplayAdFailed = true"
     ></script>
     <script>
-      (() => {
-        let attempts = 0;
-        const reportCreative = () => {
-          const creative = document.querySelector('iframe, object, embed');
-          if (creative) {
-            parent.postMessage({ source: ${source}, status: 'rendered' }, '*');
-            return;
-          }
-          if (window.__novaplayAdFailed || attempts >= 40) {
-            parent.postMessage({ source: ${source}, status: 'failed' }, '*');
-            return;
-          }
-          attempts += 1;
-          setTimeout(reportCreative, 250);
-        };
-        reportCreative();
-      })();
+      if (window.__novaplayAdFailed) {
+        parent.postMessage({ source: ${source}, status: 'failed' }, '*');
+      } else {
+        window.__novaplayReportCreative();
+      }
     </script>
   </body>
 </html>`;
 }
 
+const AD_DOCUMENT = createAdDocument();
+
 const AdsterraPauseBanner = forwardRef(function AdsterraPauseBanner(_, ref) {
-  const [initialized, setInitialized] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [loadState, setLoadState] = useState('idle');
-  const pendingShowRef = useRef(false);
+  const [loadState, setLoadState] = useState('loading');
+  const shouldBeVisibleRef = useRef(false);
   const loadTimerRef = useRef(null);
   const mountedRef = useRef(true);
   const iframeRef = useRef(null);
 
   const hide = () => {
-    pendingShowRef.current = false;
+    shouldBeVisibleRef.current = false;
     if (mountedRef.current) setVisible(false);
   };
 
-  const revealIfEligible = () => {
-    const lastShownAt = Number(localStorage.getItem(LAST_SHOWN_KEY) || 0);
-    if (Date.now() - lastShownAt < COOLDOWN_MS) return false;
-    localStorage.setItem(LAST_SHOWN_KEY, String(Date.now()));
-    setVisible(true);
-    return true;
-  };
-
   const show = () => {
-    const lastShownAt = Number(localStorage.getItem(LAST_SHOWN_KEY) || 0);
-    if (Date.now() - lastShownAt < COOLDOWN_MS || loadState === 'failed') return false;
-    if (loadState === 'loaded') return revealIfEligible();
-    pendingShowRef.current = true;
-    if (!initialized) {
-      setInitialized(true);
-      setLoadState('loading');
+    if (loadState === 'failed') return false;
+    shouldBeVisibleRef.current = true;
+    if (loadState === 'loaded') {
+      flushSync(() => setVisible(true));
     }
     return true;
   };
 
-  useImperativeHandle(ref, () => ({ show, hide }), [initialized, loadState]);
+  useImperativeHandle(ref, () => ({ show, hide }), [loadState]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -122,17 +107,14 @@ const AdsterraPauseBanner = forwardRef(function AdsterraPauseBanner(_, ref) {
       if (event.source !== iframeRef.current?.contentWindow) return;
       clearTimeout(loadTimerRef.current);
       if (event.data.status === 'failed') {
-        pendingShowRef.current = false;
+        shouldBeVisibleRef.current = false;
         setLoadState('failed');
         setVisible(false);
         return;
       }
       if (event.data.status !== 'rendered') return;
       setLoadState('loaded');
-      if (pendingShowRef.current) {
-        pendingShowRef.current = false;
-        revealIfEligible();
-      }
+      if (shouldBeVisibleRef.current) setVisible(true);
     };
     window.addEventListener('message', onMessage);
     return () => {
@@ -143,14 +125,14 @@ const AdsterraPauseBanner = forwardRef(function AdsterraPauseBanner(_, ref) {
   }, []);
 
   useEffect(() => {
-    if (!initialized || loadState !== 'loading') return undefined;
+    if (loadState !== 'loading') return undefined;
     loadTimerRef.current = setTimeout(() => {
-      pendingShowRef.current = false;
+      shouldBeVisibleRef.current = false;
       setLoadState('failed');
       setVisible(false);
     }, 30000);
     return () => clearTimeout(loadTimerRef.current);
-  }, [initialized, loadState]);
+  }, [loadState]);
 
   return (
     <div
@@ -158,19 +140,17 @@ const AdsterraPauseBanner = forwardRef(function AdsterraPauseBanner(_, ref) {
       aria-hidden={!visible}
       data-load-state={loadState}
     >
-      {initialized && (
-        <iframe
-          className="pause-ad-frame"
-          title="Advertisement"
-          width="300"
-          height="250"
-          srcDoc={createAdDocument()}
-          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-          scrolling="no"
-          referrerPolicy="no-referrer-when-downgrade"
-          ref={iframeRef}
-        />
-      )}
+      <iframe
+        className="pause-ad-frame"
+        title="Advertisement"
+        width="300"
+        height="250"
+        srcDoc={AD_DOCUMENT}
+        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+        scrolling="no"
+        referrerPolicy="no-referrer-when-downgrade"
+        ref={iframeRef}
+      />
     </div>
   );
 });
