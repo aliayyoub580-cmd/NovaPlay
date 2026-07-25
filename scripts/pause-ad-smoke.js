@@ -75,7 +75,9 @@ app.whenReady().then(async () => {
         loadState: overlay?.dataset.loadState || null,
         iframeCount: document.querySelectorAll('.pause-ad-frame').length,
         playing: document.querySelector('.play-btn')?.getAttribute('aria-label') === 'Pause',
-        srcDocLength: document.querySelector('.pause-ad-frame')?.srcdoc?.length || 0
+        srcDocLength: document.querySelector('.pause-ad-frame')?.srcdoc?.length || 0,
+        creativeCount: document.querySelector('.pause-ad-frame')?.contentDocument
+          ?.querySelectorAll('iframe, object, embed').length || 0
       };
     })()
   `);
@@ -102,7 +104,7 @@ app.whenReady().then(async () => {
     adErrors,
   };
   result.ok = pausedState.exists && pausedState.visible && pausedState.loadState === 'loaded' &&
-    pausedState.iframeCount === 1 && pausedState.playing === false &&
+    pausedState.iframeCount === 1 && pausedState.creativeCount > 0 && pausedState.playing === false &&
     hiddenAfterResume && cooldownState.visible === false && cooldownState.iframeCount === 1 &&
     adRequests.some(request => request.phase === 'completed' && request.statusCode < 400);
   console.log(JSON.stringify(result, null, 2));

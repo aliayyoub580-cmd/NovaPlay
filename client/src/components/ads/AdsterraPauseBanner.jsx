@@ -50,16 +50,30 @@ function createAdDocument() {
   <body>
     <script>
       window.atOptions = ${options};
+      window.__novaplayAdFailed = false;
     </script>
     <script
       src=${scriptUrl}
       onerror="window.__novaplayAdFailed = true"
     ></script>
     <script>
-      parent.postMessage({
-        source: ${source},
-        status: window.__novaplayAdFailed ? 'failed' : 'loaded'
-      }, '*');
+      (() => {
+        let attempts = 0;
+        const reportCreative = () => {
+          const creative = document.querySelector('iframe, object, embed');
+          if (creative) {
+            parent.postMessage({ source: ${source}, status: 'rendered' }, '*');
+            return;
+          }
+          if (window.__novaplayAdFailed || attempts >= 40) {
+            parent.postMessage({ source: ${source}, status: 'failed' }, '*');
+            return;
+          }
+          attempts += 1;
+          setTimeout(reportCreative, 250);
+        };
+        reportCreative();
+      })();
     </script>
   </body>
 </html>`;
@@ -72,6 +86,7 @@ const AdsterraPauseBanner = forwardRef(function AdsterraPauseBanner(_, ref) {
   const pendingShowRef = useRef(false);
   const loadTimerRef = useRef(null);
   const mountedRef = useRef(true);
+  const iframeRef = useRef(null);
 
   const hide = () => {
     pendingShowRef.current = false;
@@ -104,6 +119,7 @@ const AdsterraPauseBanner = forwardRef(function AdsterraPauseBanner(_, ref) {
     mountedRef.current = true;
     const onMessage = event => {
       if (event.data?.source !== AD_MESSAGE_SOURCE) return;
+      if (event.source !== iframeRef.current?.contentWindow) return;
       clearTimeout(loadTimerRef.current);
       if (event.data.status === 'failed') {
         pendingShowRef.current = false;
@@ -111,6 +127,7 @@ const AdsterraPauseBanner = forwardRef(function AdsterraPauseBanner(_, ref) {
         setVisible(false);
         return;
       }
+      if (event.data.status !== 'rendered') return;
       setLoadState('loaded');
       if (pendingShowRef.current) {
         pendingShowRef.current = false;
@@ -148,9 +165,10 @@ const AdsterraPauseBanner = forwardRef(function AdsterraPauseBanner(_, ref) {
           width="300"
           height="250"
           srcDoc={createAdDocument()}
-          sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
           scrolling="no"
           referrerPolicy="no-referrer-when-downgrade"
+          ref={iframeRef}
         />
       )}
     </div>
