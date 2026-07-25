@@ -5,6 +5,7 @@ import { api } from '../../utils/api';
 import ResumePrompt from './ResumePrompt';
 import AudioVisualizer from './AudioVisualizer';
 import VideoControls from './VideoControls';
+import AdsterraPauseBanner from '../ads/AdsterraPauseBanner';
 import './PlayerView.css';
 
 export default function PlayerView() {
@@ -31,6 +32,7 @@ export default function PlayerView() {
   const hideTimer       = useRef(null);
   const volumeTimer     = useRef(null);
   const volumeReady     = useRef(false);
+  const pauseAdRef      = useRef(null);
 
   const isVideo = currentMedia?.media_type === 'video';
 
@@ -78,6 +80,22 @@ export default function PlayerView() {
       el.pause();
     }
   }, [playing]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (playing) pauseAdRef.current?.hide();
+  }, [playing]);
+
+  useEffect(() => {
+    const onUserPlayback = event => {
+      if (event.detail?.paused) pauseAdRef.current?.show();
+      else pauseAdRef.current?.hide();
+    };
+    window.addEventListener('novaplay-user-playback', onUserPlayback);
+    return () => {
+      window.removeEventListener('novaplay-user-playback', onUserPlayback);
+      pauseAdRef.current?.hide();
+    };
+  }, []);
 
   // ── Sync volume / mute ─────────────────────────────────────────────────
   useEffect(() => {
@@ -251,7 +269,7 @@ export default function PlayerView() {
     if (event.button !== 1) return;
     event.preventDefault();
     const store = usePlayerStore.getState();
-    store.setPlaying(!store.playing);
+    store.setPlayingByUser(!store.playing);
   }, []);
 
   const handleContextMenu = useCallback((event) => {
@@ -350,6 +368,8 @@ export default function PlayerView() {
         </div>
       )}
 
+      <AdsterraPauseBanner ref={pauseAdRef} />
+
       {/* ── Resume prompt ── */}
       {resumePrompt && (
         <ResumePrompt
@@ -387,7 +407,7 @@ export default function PlayerView() {
         >
           <button onClick={() => {
             const store = usePlayerStore.getState();
-            store.setPlaying(!store.playing);
+            store.setPlayingByUser(!store.playing);
             setContextMenu(null);
           }}>{playing ? 'Pause' : 'Play'}</button>
           <button onClick={() => {

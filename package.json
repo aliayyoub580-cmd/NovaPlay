@@ -12,6 +12,7 @@
     "dev:electron": "wait-on http://localhost:5173 && electron .",
     "build:client": "cd client && npm run build",
     "test:media": "npm run build:client && set ELECTRON_RUN_AS_NODE=&& electron scripts/media-smoke.js \"client/public/DAKU.mp3\" \"client/public/41 Kaka___Teeji_Seat__Official_Video__Aakansha___New_Punjabi_Songs_2021-Latest_Punjabi_Songs_2020_2021(720p).mp4\"",
+    "test:pause-ad": "npm run build:client && set ELECTRON_RUN_AS_NODE=&& electron scripts/pause-ad-smoke.js",
     "build": "npm run build:client",
     "build:installer": "npm run build:client && electron-builder --win nsis",
     "build:portable": "npm run build:client && electron-builder --win portable",

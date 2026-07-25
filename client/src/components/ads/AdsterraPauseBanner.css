@@ -1,0 +1,47 @@
+.pause-ad-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 220ms ease, background-color 220ms ease, visibility 0s linear 220ms;
+}
+
+.pause-ad-overlay.visible {
+  background: rgba(0, 0, 0, 0.48);
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.pause-ad-frame {
+  flex: 0 0 auto;
+  width: min(300px, calc(100vw - 32px));
+  height: min(250px, calc(100vh - 150px));
+  max-width: 300px;
+  max-height: 250px;
+  border: 0;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: auto;
+}
+
+@media (max-height: 430px) {
+  .pause-ad-overlay {
+    align-items: flex-start;
+    padding-top: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pause-ad-overlay {
+    transition: none;
+  }
+}

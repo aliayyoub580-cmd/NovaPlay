@@ -55,6 +55,15 @@ export const usePlayerStore = create((set, get) => ({
   setDuration:    (d) => set({ duration: d }),
   setCurrentTime: (t) => set({ currentTime: t }),
   setPlaying:     (p) => set({ playing: p }),
+  setPlayingByUser: (p) => {
+    const state = get();
+    if (state.currentMedia && state.playing !== p) {
+      window.dispatchEvent(new CustomEvent('novaplay-user-playback', {
+        detail: { paused: !p },
+      }));
+    }
+    set({ playing: p });
+  },
   setSubtitleFile:  (f) => set({ subtitleFile: f }),
   setSubtitleDelay: (d) => set({ subtitleDelay: d }),
   setAudioDelay:    (d) => set({ audioDelay: d }),

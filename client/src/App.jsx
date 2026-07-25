@@ -42,7 +42,7 @@ export default function App() {
       // Tray actions
       const disposeTrayAction = window.novaplay.onTrayAction((action) => {
         const store = usePlayerStore.getState();
-        if (action === 'play_pause') store.setPlaying(!store.playing);
+        if (action === 'play_pause') store.setPlayingByUser(!store.playing);
         if (action === 'next') store.next();
         if (action === 'prev') store.prev();
       });

@@ -36,7 +36,7 @@ export function useKeyboardShortcuts() {
         store.setVolume(store.volume - 0.05);
       } else if (!e.ctrlKey && !e.altKey && !e.shiftKey && (e.code === 'Space' || e.key === ' ')) {
         e.preventDefault();
-        store.setPlaying(!store.playing);
+        store.setPlayingByUser(!store.playing);
       } else if (!e.ctrlKey && !e.altKey && !e.shiftKey && key === 'm') {
         e.preventDefault();
         store.toggleMuted();

@@ -16,7 +16,7 @@ export default function PlaybackBar() {
   const {
     currentMedia, playing, duration, currentTime,
     volume, muted, speed, loop, shuffle, fullscreen,
-    setPlaying, toggleMuted, setVolume, setLoop,
+    setPlaying, setPlayingByUser, toggleMuted, setVolume, setLoop,
     toggleShuffle, setFullscreen, next, prev, setPip,
     setCurrentTime,
   } = usePlayerStore();
@@ -50,7 +50,7 @@ export default function PlaybackBar() {
     };
   }, [fullscreen]);
 
-  const togglePlay = () => setPlaying(!playing);
+  const togglePlay = () => setPlayingByUser(!playing);
 
   const stop = () => {
     setPlaying(false);
